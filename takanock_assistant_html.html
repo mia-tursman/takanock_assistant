@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>takanock Assistant</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1a2744">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { overflow-x: hidden; max-width: 100%; width: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0ebe0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px 12px;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 680px;
+      height: 80vh;
+      background: #faf7f2;
+      border: 0.5px solid #d8d0c0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    #header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 0.5px solid #d8d0c0;
+      background: #1a2744;
+    }
+
+    #header-left { display: flex; align-items: center; gap: 10px; }
+    #header-title { font-size: 15px; font-weight: 500; color: #fff; letter-spacing: -0.2px; }
+    #header-brand { color: #e8400a; }
+    #header-sub { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+    #new-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      padding: 5px 11px;
+      border: 0.5px solid rgba(255,255,255,0.3);
+      border-radius: 3px;
+      background: transparent;
+      color: rgba(255,255,255,0.7);
+      cursor: pointer;
+      transition: background 0.15s;
+      letter-spacing: 0.3px;
+    }
+    #new-btn:hover { background: rgba(255,255,255,0.1); }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: #faf7f2;
+    }
+
+    .msg { display: flex; flex-direction: column; gap: 4px; max-width: 82%; }
+    .msg.user { align-self: flex-end; align-items: flex-end; }
+    .msg.assistant { align-self: flex-start; align-items: flex-start; }
+
+    .bubble {
+      padding: 10px 14px;
+      font-size: 14px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      border-radius: 3px;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .user .bubble { background: #1a2744; color: #fff; }
+    .assistant .bubble { background: #fff; color: #1a2744; border: 0.5px solid #d8d0c0; }
+
+    .msg-label { font-size: 11px; color: #a89e8a; padding: 0 2px; letter-spacing: 0.2px; }
+
+    #typing { display: none; align-self: flex-start; padding: 0 0 4px; }
+    #typing .bubble { display: flex; gap: 4px; align-items: center; padding: 12px 16px; }
+    .dot { width: 5px; height: 5px; border-radius: 50%; background: #a89e8a; animation: bounce 1.2s infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+    #input-area {
+      padding: 12px 20px;
+      border-top: 0.5px solid #d8d0c0;
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      background: #faf7f2;
+    }
+
+    #msg-input {
+      flex: 1;
+      resize: none;
+      border: 0.5px solid #c8bfaf;
+      border-radius: 3px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: inherit;
+      line-height: 1.5;
+      color: #1a2744;
+      background: #fff;
+      max-height: 120px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    #msg-input:focus { border-color: #1a2744; }
+    #msg-input::placeholder { color: #b0a898; }
+
+    #send-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 3px;
+      border: none;
+      background: #e8400a;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: opacity 0.15s;
+    }
+    #send-btn:hover { opacity: 0.85; }
+    #send-btn:disabled { opacity: 0.3; cursor: default; }
+
+    #status-bar {
+      padding: 5px 20px;
+      background: #1a2744;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #status-dot { width: 5px; height: 5px; border-radius: 50%; background: #e8400a; }
+    #status-text { font-size: 11px; color: rgba(255,255,255,0.45); letter-spacing: 0.2px; }
+
+    @media (max-width: 600px) {
+      #header-sub { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <div id="header">
+    <div id="header-left">
+      <div>
+        <div id="header-title"><span id="header-brand">takanock</span> Assistant</div>
+        <div id="header-sub">Your internal AI helper</div>
+      </div>
+    </div>
+    <button id="new-btn" onclick="resetChat()">
+      <i class="ti ti-refresh"></i> New chat
+    </button>
+  </div>
+
+  <div id="messages">
+    <div class="msg assistant">
+      <span class="msg-label">takanock Assistant</span>
+      <div class="bubble">Hi! I'm the takanock internal assistant. I can help you with:
+
+• IT issues (hardware, software, access, network)
+• AI & automation ideas you'd like to submit
+• General questions about takanock
+
+What can I help you with today?</div>
+    </div>
+  </div>
+
+  <div id="typing">
+    <div class="bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+  </div>
+
+  <div id="input-area">
+    <textarea id="msg-input" rows="1" placeholder="Ask me anything…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button id="send-btn" onclick="sendMessage()" aria-label="Send">
+      <i class="ti ti-arrow-up" style="font-size:18px"></i>
+    </button>
+  </div>
+
+  <div id="status-bar">
+    <div id="status-dot"></div>
+    <span id="status-text">Connected — takanock Assistant</span>
+  </div>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `You are the takanock internal assistant. You help takanock employees with three things:
+
+1. IT ISSUES — hardware, software, access/permissions, network problems
+2. AI & AUTOMATION IDEAS — when someone has an idea for automating a repetitive task or wants to request a new AI tool/workflow
+3. GENERAL QUESTIONS — anything about takanock, its teams, processes, or contacts
+
+ROUTING RULES:
+- If the user has an IT issue → gather info and log an IT ticket
+- If the user has an automation/AI idea → gather info and log an automation request
+- If the user has a general question → answer helpfully and concisely
+- If unclear → ask a clarifying question
+
+EMAIL CONVENTION: Do not ask for email. Infer it as: first letter of first name + last name + @takanock.com. John Smith = jsmith@takanock.com.
+
+--- IT TICKET FLOW ---
+Gather conversationally (ask name + department first together):
+- Submitter Name
+- Department (Finance, Development, Engineering, Operations, GIS, Executive, Other)
+- Request Type (Permissions Issue, New SharePoint Site, Hardware Issue, New Dataset, Other) — infer, don't ask
+- Request Description
+- Urgency (Low, Medium, High, Urgent) — infer if possible
+
+Once you have all fields, summarize and ask to confirm. When confirmed, respond ONLY with this JSON and nothing else:
+{"type":"it","submitted":true,"name":"VALUE","email":"VALUE","department":"VALUE","requestType":"VALUE","description":"VALUE","urgency":"VALUE"}
+
+--- AUTOMATION INTAKE FLOW ---
+Gather conversationally (ask name + department first together):
+- Submitter Name
+- Department
+- Title (short name for the automation idea)
+- Description (what they want automated)
+- Business Problem (what problem does this solve)
+- Current Process (how do they do it today)
+- Submitter Priority (Low, Medium, High)
+
+Once you have all fields, summarize and ask to confirm. When confirmed, respond ONLY with this JSON and nothing else:
+{"type":"automation","submitted":true,"name":"VALUE","email":"VALUE","department":"VALUE","title":"VALUE","description":"VALUE","businessProblem":"VALUE","currentProcess":"VALUE","priority":"VALUE"}
+
+Keep responses concise and friendly. Never output JSON until the user has confirmed.`;
+
+let history = [];
+let isLoading = false;
+
+async function sendMessage() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text || isLoading) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  appendMessage('user', text);
+  history.push({ role: 'user', content: text });
+  setLoading(true);
+
+  try {
+    const res = await fetch('/api/proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: history
+      })
+    });
+
+    const data = await res.json();
+    let reply = data.content?.find(b => b.type === 'text')?.text || 'Sorry, something went wrong.';
+
+    let parsed = null;
+    try { parsed = JSON.parse(reply.trim()); } catch(e) {}
+
+    if (parsed && parsed.submitted === true) {
+      if (parsed.type === 'it') {
+        await fetch('/api/proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ airtable_record: parsed, table: 'it' })
+        });
+        const ref = 'TKN-IT-' + Math.floor(1000 + Math.random() * 9000);
+        reply = `Your IT ticket has been submitted! Reference: ${ref}. Jacob from IT will be in touch soon.`;
+      } else if (parsed.type === 'automation') {
+        await fetch('/api/proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ airtable_record: parsed, table: 'automation' })
+        });
+        const ref = 'TKN-AUTO-' + Math.floor(1000 + Math.random() * 9000);
+        reply = `Your automation idea has been submitted! Reference: ${ref}. Ivan will review it and follow up.`;
+      }
+    }
+
+    history.push({ role: 'assistant', content: reply });
+    appendMessage('assistant', reply);
+  } catch (e) {
+    appendMessage('assistant', 'Connection error — please try again.');
+  }
+
+  setLoading(false);
+}
+
+function appendMessage(role, text) {
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = `msg ${role}`;
+  const label = document.createElement('span');
+  label.className = 'msg-label';
+  label.textContent = role === 'user' ? 'You' : 'takanock Assistant';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.textContent = text;
+  wrap.appendChild(label);
+  wrap.appendChild(bubble);
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function setLoading(val) {
+  isLoading = val;
+  document.getElementById('typing').style.display = val ? 'flex' : 'none';
+  document.getElementById('send-btn').disabled = val;
+  if (val) document.getElementById('messages').scrollTop = 9999;
+}
+
+function resetChat() {
+  history = [];
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'msg assistant';
+  wrap.innerHTML = `<span class="msg-label">takanock Assistant</span><div class="bubble">Hi! I'm the takanock internal assistant. I can help you with:\n\n• IT issues (hardware, software, access, network)\n• AI & automation ideas you'd like to submit\n• General questions about takanock\n\nWhat can I help you with today?</div>`;
+  msgs.appendChild(wrap);
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+</script>
+
+</body>
+</html>
