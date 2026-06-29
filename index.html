@@ -243,7 +243,7 @@ Gather conversationally (ask name + department first together):
 Once you have all fields, summarize and ask to confirm. When confirmed, respond ONLY with this JSON and nothing else:
 {"type":"automation","submitted":true,"name":"VALUE","email":"VALUE","department":"VALUE","title":"VALUE","description":"VALUE","businessProblem":"VALUE","currentProcess":"VALUE","priority":"VALUE"}
 
-Keep responses concise and friendly. Never output JSON until the user has confirmed.`;
+Keep responses concise and friendly. Never output JSON until the user has confirmed.` ;
 
 let history = [];
 let isLoading = false;
@@ -285,7 +285,7 @@ async function sendMessage() {
           body: JSON.stringify({ airtable_record: parsed, table: 'it' })
         });
         const ref = 'TKN-IT-' + Math.floor(1000 + Math.random() * 9000);
-        reply = `Your IT ticket has been submitted! Reference: ${ref}. Jacob from IT will be in touch soon.`;
+        reply = `Your IT ticket has been submitted! Jacob from IT will be in touch soon.`;
       } else if (parsed.type === 'automation') {
         await fetch('/api/proxy', {
           method: 'POST',
@@ -293,7 +293,7 @@ async function sendMessage() {
           body: JSON.stringify({ airtable_record: parsed, table: 'automation' })
         });
         const ref = 'TKN-AUTO-' + Math.floor(1000 + Math.random() * 9000);
-        reply = `Your automation idea has been submitted! Reference: ${ref}. Ivan will review it and follow up.`;
+        reply = `Your automation idea has been submitted! Ivan will review it and follow up.`;
       }
     }
 
