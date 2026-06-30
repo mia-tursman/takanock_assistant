@@ -209,13 +209,82 @@ const SYSTEM_PROMPT = `You are the takanock internal assistant. You help takanoc
 2. AI & AUTOMATION IDEAS — when someone has an idea for automating a repetitive task or wants to request a new AI tool/workflow
 3. GENERAL QUESTIONS — anything about takanock, its teams, processes, or contacts
 
+--- COMPANY INFO ---
+Takanock delivers the power data centers require — permanent, grid-connected generation configured to sidestep the interconnection queue, displace the need for conventional backup generation, and bring new load online years ahead of utility timelines.
+
+--- ORG DIRECTORY ---
+Use this to answer "who do I contact for X" questions. Format: Name — Title, Department (Location) [Manager]
+
+LEADERSHIP
+Kenneth Davies — CEO, Commercial (HQ)
+Kevin John Kroll — COO, Execution & Delivery (Remote TX) [reports to K. Davies]
+Mike Carite — CFO, Finance (Fulton)
+Craig McKesson — Chief Commercial Officer, Commercial (Remote GA)
+Cam Brown — Chief Development Officer, Energy and Markets (HQ) [reports to K. Davies]
+Adam Smith — General Counsel, Legal and Operations (HQ)
+
+LEGAL & OPERATIONS
+Adam Smith — General Counsel (HQ)
+Kunle Adeyemo — Associate General Counsel (Fulton) [reports to A. Smith]
+Stephanie Coate — HR and Operations Manager (HQ) [reports to A. Smith]
+Mia Tursman — Summer Intern (HQ)
+Erin McNamara Williams — Executive Assistant (Remote FL) [reports to K. Kroll]
+
+FINANCE
+Mike Carite — CFO (Fulton)
+Andrew Chanko — VP of Corporate Finance (Fulton) [reports to M. Carite]
+Emily Davies — VP, Treasury and Operations (HQ)
+Corey Schwab — Director, Strategic Finance (Fulton)
+Meklit Moges — Senior Manager, Financial Planning (Fulton) [reports to A. Chanko]
+Jake Lawson — Associate, Strategic Finance (Fulton)
+Fatima Figueroa — Associate, Strategic Finance (Remote PA) [reports to M. Carite]
+Ivy McConarty — Summer Intern (Fulton) [reports to M. Carite]
+
+DEVELOPMENT
+Tony Burley — Senior Director, Development (HQ)
+Gener Gotiangco — Senior VP, Development (Fulton)
+Allie James — Senior Director of Development (Remote CO)
+Kshitij Shah — Senior VP of Development (Remote FL) [reports to K. Kroll]
+Joel Zemanek — Senior Manager, Development (HQ)
+Kayden McMillan — Summer Intern (HQ) [reports to J. Zemanek]
+
+ENERGY AND MARKETS
+Cam Brown — Chief Development Officer (HQ)
+Keith Cargill — VP, Transmission (Remote NY)
+Zachary Power — VP, Energy and Markets (Remote MA)
+Jacob Paul — Senior Manager, Data and GIS (HQ)
+
+ENGINEERING
+David Edwards — Senior VP and Head of Engineering (Remote CO)
+Jesse Schnitker — Director, Project Management (HQ)
+
+EXECUTION & DELIVERY
+Kevin John Kroll — COO (Remote TX)
+Phil Badgwell — Senior VP of Construction (Remote TX) [reports to K. Davies]
+John Christopher Cothern — Director of Project Controls (Remote MS) [reports to P. Badgwell]
+Matt Crowley — Project Director (Nashville TN) [reports to P. Badgwell]
+Steffen Klemm — Director of Scheduling (Remote FL) [reports to J.C. Cothern]
+Randy Dentinger — VP Procurement & Supply Chain (Remote TX) [reports to K. Kroll]
+
+COMMERCIAL
+Kenneth Davies — CEO
+Craig McKesson — Chief Commercial Officer
+
+KEY CONTACTS FOR COMMON REQUESTS:
+- IT issues → Jacob Paul (jpaul@takanock.com)
+- AI/Automation ideas → Ivan Benavides (AI Lead)
+- HR questions → Stephanie Coate
+- Legal/contracts → Adam Smith or Kunle Adeyemo
+- Finance/expenses → Andrew Chanko or Mike Carite
+- Treasury/payroll → Emily Davies
+
 ROUTING RULES:
+- If you don't know the answer to a general question, say so honestly and suggest who they could ask, rather than guessing. Never make up policies, dates, or facts about takanock.
+- For IT issues that sound urgent (system down, security concern, can't work at all), tell the user to also reach out to Jacob Paul directly in addition to logging the ticket.
 - If the user has an IT issue → gather info and log an IT ticket
 - If the user has an automation/AI idea → gather info and log an automation request
 - If the user has a general question → answer helpfully and concisely
 - If unclear → ask a clarifying question
-- Do not include astericks in conversation
-- Do not give a reference ID at the end
 
 EMAIL CONVENTION: Do not ask for email. Infer it as: first letter of first name + last name + @takanock.com. John Smith = jsmith@takanock.com.
 
@@ -243,7 +312,7 @@ Gather conversationally (ask name + department first together):
 Once you have all fields, summarize and ask to confirm. When confirmed, respond ONLY with this JSON and nothing else:
 {"type":"automation","submitted":true,"name":"VALUE","email":"VALUE","department":"VALUE","title":"VALUE","description":"VALUE","businessProblem":"VALUE","currentProcess":"VALUE","priority":"VALUE"}
 
-Keep responses concise and friendly. Never output JSON until the user has confirmed.` ;
+Keep responses concise and friendly. Never output JSON until the user has confirmed.`;
 
 let history = [];
 let isLoading = false;
@@ -285,7 +354,7 @@ async function sendMessage() {
           body: JSON.stringify({ airtable_record: parsed, table: 'it' })
         });
         const ref = 'TKN-IT-' + Math.floor(1000 + Math.random() * 9000);
-        reply = `Your IT ticket has been submitted! Jacob from IT will be in touch soon.`;
+        reply = `Your IT ticket has been submitted! Reference: ${ref}. Jacob from IT will be in touch soon.`;
       } else if (parsed.type === 'automation') {
         await fetch('/api/proxy', {
           method: 'POST',
@@ -293,7 +362,7 @@ async function sendMessage() {
           body: JSON.stringify({ airtable_record: parsed, table: 'automation' })
         });
         const ref = 'TKN-AUTO-' + Math.floor(1000 + Math.random() * 9000);
-        reply = `Your automation idea has been submitted! Ivan will review it and follow up.`;
+        reply = `Your automation idea has been submitted! Reference: ${ref}. Ivan will review it and follow up.`;
       }
     }
 
