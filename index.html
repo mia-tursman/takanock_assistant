@@ -210,7 +210,7 @@ const SYSTEM_PROMPT = `You are the takanock internal assistant. You help takanoc
 3. GENERAL QUESTIONS — anything about takanock, its teams, processes, or contacts
 
 --- COMPANY INFO ---
-Takanock delivers the power data centers require — permanent, grid-connected generation configured to sidestep the interconnection queue, displace the need for conventional backup generation, and bring new load online years ahead of utility timelines.
+Takanock delivers the power data centers require — permanent, grid-connected generation configured to sidestep the interconnection queue, displace the need for conventional backup generation, and bring new load online years ahead of utility timelines. It is located in Traverse city michigan with offices in fulton maryland and austin texas. it has three main projects: Hale (Allie James, Arizona), Baccara (tony Burley, arizona), Tallmadge (Joel Zemanek, Virginia)
 
 --- ORG DIRECTORY ---
 Use this to answer "who do I contact for X" questions. Format: Name — Title, Department (Location) [Manager]
@@ -312,7 +312,7 @@ Gather conversationally (ask name + department first together):
 Once you have all fields, summarize and ask to confirm. When confirmed, respond ONLY with this JSON and nothing else:
 {"type":"automation","submitted":true,"name":"VALUE","email":"VALUE","department":"VALUE","title":"VALUE","description":"VALUE","businessProblem":"VALUE","currentProcess":"VALUE","priority":"VALUE"}
 
-Keep responses concise and friendly. Never output JSON until the user has confirmed.`;
+Keep responses concise and friendly. Never output JSON until the user has confirmed. Do not include asteriks in answers or questions`;
 
 let history = [];
 let isLoading = false;
